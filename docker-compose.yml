@@ -70,10 +70,63 @@ services:
     networks:
       - app-network
     restart: unless-stopped
+  postgres-zabbix:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: zabbix
+      POSTGRES_USER: zabbix
+      POSTGRES_PASSWORD: zabbix
+    volumes:
+      - zabbix-postgres-data:/var/lib/postresql/data
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  zabbix-server:
+    image: zabbix/zabbix-server-pgsql:alpine-7.0-latest
+    environment:
+      DB_SERVER_HOST: postgres-zabbix
+      POSTGRES_USER: zabbix
+      POSTGRES_PASSWORD: zabbix
+      POSTGRES_DB: zabbix
+    depends_on:
+      - postgres-zabbix
+    expose:
+      - "10051"
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  zabbix-web:
+    image: zabbix/zabbix-web-nginx-pgsql:alpine-7.0-latest
+    environment:
+      ZBX_SERVER_HOST: zabbix-server
+      DB_SERVER_HOST: postgres-zabbix
+      POSTGRES_USER: zabbix
+      POSTGRES_PASSWORD: zabbix
+      POSTGRES_DB: zabbix
+      PHP_TZ: Asia/Yekaterinburg
+    ports:
+      - "8080:8080"
+    depends_on:
+      - zabbix-server
+    networks:
+      - app-network
+    restart: unless-stopped
+
+  zabbix-agent:
+    image: imageNamezabbix/zabbix-agent2:alpine-7.0-latest
+    environment:
+      ZBX_HOSTNAME: observable-shop-host
+      ZBX_SERVER_HOST: zabbix-server
+    networks:
+      - app-network
+    restart: unless-stopped
 
 volumes:
   grafana-data:
   elasticsearch-data:
+  zabbix-postgres-data:
 networks:
   app-network:
     driver: bridge
