@@ -48,7 +48,7 @@ services:
     image: ddocker.elastic.co/elasticsearch/elasticsearch:8.15.3
     container_name: elasticsearch
     environment:
-      - discovery.type: single-node
+      - discovery.type: "single-node"
       - xpack.security.enabled: "false"
       - ES_JAVA_OPTS: "-Xms512m -Xmx512m"
     volumes:
