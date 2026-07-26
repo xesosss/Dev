@@ -44,7 +44,7 @@ services:
     networks:
       - app-network
     restart: unless-stopped
-  elasticsearch::
+  elasticsearch:
     image: ddocker.elastic.co/elasticsearch/elasticsearch:8.15.3
     container_name: elasticsearch
     environment:
